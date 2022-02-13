@@ -25,6 +25,6 @@ planespotter.py is the main script, which runs continuously...
 	python3 planespotter.py
 
 
-## How to configure
+## How to configure 
 
 The bulk of the configuration is done in planespotter-conf.yaml.  A sample configuration file is included.
