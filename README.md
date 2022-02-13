@@ -2,6 +2,8 @@
 
 A Python script to alert you of awesome aircraft in your area!  Uses the adsbexchange API to pull aircraft data.
 
+![Example message](https://github.com/nicksmadscience/planespotter/blob/main/example.png?raw=True)
+
 
 
 ## How to install
@@ -26,6 +28,3 @@ planespotter.py is the main script, which runs continuously...
 ## How to configure
 
 The bulk of the configuration is done in planespotter-conf.yaml.  A sample configuration file is included.
-
-
-![Example message](https://github.com/nicksmadscience/planespotter/blob/main/example.png?raw=True)
