@@ -28,4 +28,4 @@ planespotter.py is the main script, which runs continuously...
 The bulk of the configuration is done in planespotter-conf.yaml.  A sample configuration file is included.
 
 
-![Example message](https://github.com/nicksmadscience/planespotter/blob/master/example.png?raw=true)
+![Example message](https://github.com/nicksmadscience/planespotter/blob/main/example.png?raw=True)
