@@ -42,7 +42,7 @@ def planeSpotted(aircraft, config):
     '''Called by main script when an aircraft is spotted nearby.  This is where all your custom functionality goes.'''
     # exampleAlertFunction(aircraft)
 
-    status = generateHumanReadableStatus(aircraft, config['location']['latitude'], config['location']['longitude'])
+    status = generateHumanReadableStatus(aircraft, config)
     print (status)
     
 

@@ -1,5 +1,6 @@
 # Some helpful utility functions...
 import math, datetime
+from geopy.distance import geodesic
 
 def coordsToDegrees(home_x, home_y, target_x, target_y):
     '''Give it a pair of locations and it turns the angle between them in degrees.'''
@@ -16,18 +17,71 @@ def degreesToCardinal(degrees):
     return dirs[ix % len(dirs)]
 
 
+def calculateDistance(aircraft, config):
+    try:
+        aircraftPosition = (float(aircraft['lat']), float(aircraft['lon']))
+        print ("aircraft position: ", aircraftPosition)
+    except KeyError:
+        try:
+            aircraftPosition = (float(aircraft['lastPosition']['lat']), float(aircraft['lastPosition']['lon']))
+            print ("aircraft last position: ", aircraftPosition)
+        except:
+            return -1
+
+    feederPosition = (config['location']['latitude'], config['location']['longitude'])
+    return geodesic(aircraftPosition, feederPosition).nm
 
 
-def generateHumanReadableStatus(aircraft, userLat, userLon):
+def calculateDeviance(heading, degrees):
+    invertedPlaneHeading = (heading - 180.0) % 360.0
+    return round((invertedPlaneHeading - degrees) % 180, 1)
+
+
+
+def generateHumanReadableStatus(aircraft, config):
     '''Provide the aircraft info in the adsbexchange API format, and it gives you a quick
     summary suitable for, say, an SMS alert.'''
     global ps_config
 
-    degrees = coordsToDegrees(userLat, userLon, float(aircraft['lat']), float(aircraft['lon']))
-    cardinal = degreesToCardinal(degrees)
-    planeHeading = float(aircraft['trak'])
-    invertedPlaneHeading = (planeHeading - 180.0) % 360.0
-    deviance = round((invertedPlaneHeading - degrees) % 180, 1)
-    estArrival_mins = round((float(aircraft['dst']) / float(aircraft['spd']) * 60))
+    # due to the nature of ADS-B sending one variable per packet and uncertainty about whether
+    # all information will be present at any given time, we have to be VERY forgiving of
+    # missing information
 
-    return ("{datetime} Cool aircraft nearby! {type}, tail {tail}, {dist} mi {card}, {dev}deg deviance, {arr}m est arrival".format(type = aircraft['type'], tail=aircraft['reg'], dist = aircraft['dst'], card = cardinal, dev = deviance, arr=estArrival_mins, datetime=datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S")))
+    try:
+        degrees = coordsToDegrees(config['location']['latitude'], config['location']['longitude'], float(aircraft['lat']), float(aircraft['lon']))
+        cardinal = degreesToCardinal(degrees)
+    except KeyError:
+        cardinal = "(unknown)"
+
+    try:
+        dist_nm = calculateDistance(aircraft, config)
+        if dist_nm == -1:
+            dist = "(unknown distance)"
+        else:
+            dist = str(float(dist_nm, 2))
+    except:
+        dist = "(unknown distance)"
+
+    try:
+        deviance = calculateDeviance(float(aircraft['true_heading']), degrees)
+    except KeyError:
+        deviance = "(unknown)"
+
+    try:
+        estArrival_mins = round((dist_nm / float(aircraft['gs']) * 60))
+    except:
+        estArrival_mins = "(unknown)"
+
+    try:
+        type = aircraft['type']
+    except KeyError:
+        type = "(unknown type)"
+
+    try:
+        tail = aircraft['flight']
+    except KeyError:
+        tail = "(unknown tail)"
+
+    
+
+    return ("{datetime} Cool aircraft nearby! {type}, tail {tail}, {dist}nm {card}, {dev}deg deviance, {arr}m est arrival".format(type = type, tail=tail, dist = dist, card = cardinal, dev = deviance, arr=estArrival_mins, datetime=datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S")))
