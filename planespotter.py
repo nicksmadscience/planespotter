@@ -30,7 +30,10 @@ masterAircraft = []
 while True:
     response = requests.request("GET", url, headers=headers)
 
-    newAircraft = json.loads(response.text)['ac']
+    try:
+        newAircraft = json.loads(response.text)['ac']
+    except KeyError:
+        newAircraft = None
 
     if newAircraft != None:
 

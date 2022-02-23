@@ -2,12 +2,15 @@
 
 
 location:
-    latitude: 29.7724787
-    longitude: -95.809704
+    latitude: 39.113938
+    longitude: -76.984350
+
+    # latitude: 29.7724787
+    # longitude: -95.809704
     
 
 filters:
-    max-distance-nm: 10      # REQUIRED by adsbexchange API.
+    max-distance-nm: 5      # REQUIRED by adsbexchange API.
     max-altitude-ft: 3000
     min-airspeed-nm: 10     # TODO: not yet implemented # anything less than 20nm is probably taxiing
     max-deviance-deg: 30  # TODO: not yet implemented

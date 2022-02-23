@@ -1,5 +1,5 @@
 # Some helpful utility functions...
-import math
+import math, datetime
 
 def coordsToDegrees(home_x, home_y, target_x, target_y):
     '''Give it a pair of locations and it turns the angle between them in degrees.'''
@@ -30,4 +30,4 @@ def generateHumanReadableStatus(aircraft, userLat, userLon):
     deviance = round((invertedPlaneHeading - degrees) % 180, 1)
     estArrival_mins = round((float(aircraft['dst']) / float(aircraft['spd']) * 60))
 
-    return ("Cool aircraft nearby! {type}, tail {tail}, {dist} mi {card}, {dev}deg deviance, {arr}m est arrival".format(type = aircraft['type'], tail=aircraft['reg'], dist = aircraft['dst'], card = cardinal, dev = deviance, arr=estArrival_mins))
+    return ("{datetime} Cool aircraft nearby! {type}, tail {tail}, {dist} mi {card}, {dev}deg deviance, {arr}m est arrival".format(type = aircraft['type'], tail=aircraft['reg'], dist = aircraft['dst'], card = cardinal, dev = deviance, arr=estArrival_mins, datetime=datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S")))
