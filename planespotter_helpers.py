@@ -1,5 +1,5 @@
 # Some helpful utility functions...
-import math, datetime
+import math, datetime, traceback
 from geopy.distance import geodesic
 
 def coordsToDegrees(home_x, home_y, target_x, target_y):
@@ -46,40 +46,57 @@ def generateHumanReadableStatus(aircraft, config):
     # due to the nature of ADS-B sending one variable per packet and uncertainty about whether
     # all information will be present at any given time, we have to be VERY forgiving of
     # missing information
+    
+    # so as to eliminate reference-before-assignment errors in case my fancy try-excepts don't work
+    cardinal        = "(unknown)"
+    dist            = "(unknown distance)"
+    deviance        = "(unknown)"
+    estArrival_mins = "(unknown)"
+    type            = "(unknown type)"
+    tail            = "(unknown tail)"
+    
 
     try:
         degrees = coordsToDegrees(config['location']['latitude'], config['location']['longitude'], float(aircraft['lat']), float(aircraft['lon']))
         cardinal = degreesToCardinal(degrees)
     except KeyError:
+        degrees = -1
         cardinal = "(unknown)"
 
     try:
         dist_nm = calculateDistance(aircraft, config)
         if dist_nm == -1:
+            print ("dist_nm is -1")
             dist = "(unknown distance)"
         else:
-            dist = str(float(dist_nm, 2))
+            dist = str(round(float(dist_nm), 2))
     except:
+        traceback.print_exc()
         dist = "(unknown distance)"
 
     try:
-        deviance = calculateDeviance(float(aircraft['true_heading']), degrees)
-    except KeyError:
+        if degrees != -1:
+            deviance = calculateDeviance(float(aircraft['track']), degrees)
+    except (KeyError, UnboundLocalError):
+        traceback.print_exc()
         deviance = "(unknown)"
 
     try:
         estArrival_mins = round((dist_nm / float(aircraft['gs']) * 60))
     except:
+        traceback.print_exc()
         estArrival_mins = "(unknown)"
 
     try:
         type = aircraft['type']
     except KeyError:
+        traceback.print_exc()
         type = "(unknown type)"
 
     try:
         tail = aircraft['flight']
     except KeyError:
+        traceback.print_exc()
         tail = "(unknown tail)"
 
     

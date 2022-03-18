@@ -35,9 +35,10 @@ def findAltitude(aircraft):
     try:
         return int(aircraft['alt_geom'])
     except KeyError:
-        return int(aircraft['alt_baro'])
-    except:
-        return 999999999
+        try:
+            return int(aircraft['alt_baro'])
+        except:
+            return 999999999
 
 
 # begin the infinite loop!

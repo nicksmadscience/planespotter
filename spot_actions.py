@@ -37,18 +37,40 @@ def sendTwilioTextMessage(twilioClient, message):
 
 def exampleAlertFunction(aircraft):
     pprint.pprint(aircraft)
+    
+hex_on = bytearray.fromhex('a00101a2')
+hex_off = bytearray.fromhex('a00100a1')
+
+import serial, time
+# ser = serial.Serial('/dev/ttyUSB0', 9600)  # open serial port
+
+# while True:
+#     ser.write(hex_on)
+#     time.sleep(1.0)
+#     ser.write(hex_off)
+#     time.sleep(1.0)
 
 def planeSpotted(aircraft, config):
     '''Called by main script when an aircraft is spotted nearby.  This is where all your custom functionality goes.'''
     # exampleAlertFunction(aircraft)
-
+    
     status = generateHumanReadableStatus(aircraft, config)
     print (status)
     
+    ser = serial.Serial('/dev/ttyUSB0', 9600)
+    ser.write(hex_on)
+    time.sleep(5.0)
+    ser.write(hex_off)
+    ser.close()
 
-    if aircraft["type"] == "EC35" or aircraft["type"] == "AS65" or aircraft["type"] == "EC45" or aircraft["type"] == "B06" or aircraft["type"] == "R66" or aircraft["type"] == "BK17":
-        requests.get("http://10.0.0.220:8081/raidlight")
-        sendTwilioTextMessage (client, status)   # Remove if not using Twilio SMS
+    
+    
+    
+    
+
+    # if aircraft["type"] == "EC35" or aircraft["type"] == "AS65" or aircraft["type"] == "EC45" or aircraft["type"] == "B06" or aircraft["type"] == "R66" or aircraft["type"] == "BK17":
+    #     requests.get("http://10.0.0.220:8081/raidlight")
+    #     sendTwilioTextMessage (client, status)   # Remove if not using Twilio SMS
     # else:
     #     requests.get("http://10.0.0.220:8081/yellowlight")
 
