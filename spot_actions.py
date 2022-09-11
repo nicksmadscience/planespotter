@@ -1,7 +1,9 @@
 # Customize this script to your heart's content!  This is where you can specify what happens
 # when a new aircraft is spotted.
 import json, pprint, requests
+from termcolor import colored
 from planespotter_helpers import *
+from matrix import *
 
 
 #### TWILIO SMS STUFF - REMOVE IF NOT USED #####
@@ -54,24 +56,75 @@ def planeSpotted(aircraft, config):
     '''Called by main script when an aircraft is spotted nearby.  This is where all your custom functionality goes.'''
     # exampleAlertFunction(aircraft)
     
-    status = generateHumanReadableStatus(aircraft, config)
-    print (status)
+    degreesPan, degreesTilt, distance, cardinal, dist, deviance, estArrival_mins, type, tail = generateStats(aircraft, config)
+    status = generateHumanReadableStatus(degreesPan, degreesTilt, distance, cardinal, dist, deviance, estArrival_mins, type, tail)
     
-    ser = serial.Serial('/dev/ttyUSB0', 9600)
-    ser.write(hex_on)
-    time.sleep(5.0)
-    ser.write(hex_off)
-    ser.close()
+    
+    # ser = serial.Serial('/dev/ttyUSB0', 9600)
+    # print ("activating strobe light")
+    # ser.write(hex_on)
+    # time.sleep(5.0)
+    # print ("strobe light off")
+    # ser.write(hex_off)
+    # ser.close()
 
     
-    
+    whitelist = ["EC35",
+                 "EC20",
+                 "AS65",
+                 "EC45",
+                 "B06",
+                 "R22",
+                 "R44",
+                 "R66",
+                 "B412",
+                 "B407",
+                 "B429",
+                 "EC55",
+                 "BK17",
+                 "AS50",
+                 "UH1",
+                 "H60",
+                 "A139",
+                 "A109",
+                 "A119"
+                 ]
     
     
 
-    # if aircraft["type"] == "EC35" or aircraft["type"] == "AS65" or aircraft["type"] == "EC45" or aircraft["type"] == "B06" or aircraft["type"] == "R66" or aircraft["type"] == "BK17":
-    #     requests.get("http://10.0.0.220:8081/raidlight")
-    #     sendTwilioTextMessage (client, status)   # Remove if not using Twilio SMS
-    # else:
-    #     requests.get("http://10.0.0.220:8081/yellowlight")
-
-
+    try:
+        if aircraft["t"] in whitelist:
+            # sendTwilioTextMessage (client, status)   # Remove if not using Twilio SMS
+            print (colored(status, "yellow"))
+            matrixAlert(4)
+            
+            matrixDrawFromString(aircraft['t'])
+                
+            time.sleep(3)
+            try:
+                matrixDrawFromString(aircraft["flight"])
+                time.sleep(3)
+            except KeyError:
+                pass
+        else:
+            print (colored(status, "blue"))
+            # matrixAlert()
+            
+            matrixDrawFromString(aircraft['t'])
+                
+            time.sleep(3)
+            try:
+                matrixDrawFromString(aircraft["flight"])
+                time.sleep(3)
+            except KeyError:
+                pass
+    except KeyError:
+        print (colored(status, "red"))
+        matrixAlert(3)
+        matrixDrawFromString("bogey")
+        time.sleep(3)
+        
+    # print ("e")
+    # if aircraft["t"] not in whitelist:
+    
+        
