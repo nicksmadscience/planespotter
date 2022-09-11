@@ -6,66 +6,6 @@ from AltAzRange import AltAzimuthRange
 
 import math
 
-def threeDAzimuth(x1, y1, z1, x2, y2, z2):
-    # print ("x1: ", x1)
-    # print ("y1: ", y1)
-    # print ("z1: ", z1)
-    # print ("x2: ", x2)
-    # print ("y2: ", y2)
-    # print ("z2: ", z2)
-    distance = math.sqrt((x2-x1)**2+(y2-y1)**2+(z2 -z1)**2)
-    # print("distance: ", distance)
-    # 5.5910642993977451
-    plunge = math.degrees(math.asin((z2-z1)/distance))
-    # print("plunge: ", plunge)
-    # 1.0248287567800018 # the resulting dip_plunge is positive downward if z2 > z1
-    azimuth = math.degrees(math.atan2((x2-x1),(y2-y1)))
-    # print("azimuth: ", azimuth)
-    return azimuth
-    # -169.69515353123398 # = 360 + azimuth = 190.30484646876602 or  180+ azimuth = 10.304846468766016 over the range of 0 to 360°
-
-
-def asRadians(degrees):
-    return degrees * math.pi / 180
-
-def getXYpos(cam_lat, cam_lon, ac_lat, ac_lon):
-    """ Calculates X and Y distances in meters.
-    """
-    deltaLatitude = ac_lat - cam_lat
-    deltaLongitude = ac_lon - cam_lon
-    latitudeCircumference = 40075160 * math.cos(asRadians(cam_lat))
-    resultX = deltaLongitude * latitudeCircumference / 360
-    resultY = deltaLatitude * 40008000 / 360
-    return resultX, resultY
-
-def latToMeters(lat):
-    return lat * 111320.0
-
-def lonToMeters(lat, lon):
-    return lon * (40075000.0 * math.cos(lat) / 360.0)
-
-
-def elevation(cam_lat, cam_lon, cam_alt_ft, ac_lat, ac_lon, ac_alt_ft):
-    
-    # # convert lat and lon to meters
-    # x_meters, y_meters = getXYpos(cam_lat, cam_lon, ac_lat, ac_lon)
-    
-    cam_lat_m = latToMeters(cam_lat)
-    cam_lon_m = lonToMeters(cam_lat, cam_lon)
-    
-    ac_lat_m = latToMeters(ac_lat)
-    ac_lon_m = lonToMeters(ac_lat, ac_lon)
-    
-    cam_alt_m = cam_alt_ft * 0.3048
-    ac_alt_m = ac_alt_ft * 0.3048
-    
-    elev = math.atan((ac_alt_m - cam_alt_m) / math.sqrt((ac_lat_m - cam_lat_m)**2 + (ac_lon_m - cam_lon_m)**2))
-    
-    return elev
-    
-    # convert alt to meters
-    
-
 
 def coordsToDegrees(home_x, home_y, target_x, target_y):
     '''Give it a pair of locations and it returns the angle between them in degrees.'''
@@ -120,24 +60,6 @@ def generateStats(aircraft, config):
     tail            = "(unknown tail)"
     
 
-    # try:
-    #     degreesPan = coordsToDegrees(config['location']['latitude'], config['location']['longitude'], float(aircraft['lat']), float(aircraft['lon']))
-    #     cardinal = degreesToCardinal(degreesPan)
-    # except KeyError:
-    #     degreesPan = -1
-    #     cardinal = "(unknown)"
-        
-    # try:
-    #     # myradians = math.atan2(float(aircraft['alt_geom']), config['location']['altitude-ft'])
-    #     # degreesTilt = math.degrees(myradians) % 360.0
-    #     degreesTilt = threeDAzimuth(config['location']['latitude'],
-    #                                 config['location']['longitude'],
-    #                                 config['location']['altitude-ft'],
-    #                                 float(aircraft['lat']),
-    #                                 float(aircraft['lon']),
-    #                                 float(aircraft['alt_geom']))
-    # except KeyError:
-    #     degreesTilt = -1
     
     try:
         satellite = AltAzimuthRange()
@@ -153,8 +75,6 @@ def generateStats(aircraft, config):
         traceback.print_exc()
         
         
-    
-    
 
     try:
         dist_nm = calculateDistance(aircraft, config)
