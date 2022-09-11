@@ -4,14 +4,27 @@
 location:
     latitude: 39.113938
     longitude: -76.984350
+    altitude-ft: 475
+
+    # lancaster
+    # latitude: 40.044437
+    # longitude: -76.306229
+
+    # Frederick
+    # latitude: 39.412327
+    # longitude: -77.425461
+
+    # baltimore
+    # latitude: 39.299236
+    # longitude: -76.609383
 
     # latitude: 29.7724787
     # longitude: -95.809704
     
 
 filters:
-    max-distance-nm: 5      # REQUIRED by adsbexchange API.
-    max-altitude-ft: 3000
+    max-distance-nm: 9      # REQUIRED by adsbexchange API.
+    max-altitude-ft: 15000
     min-airspeed-nm: 10     # TODO: not yet implemented # anything less than 20nm is probably taxiing
     max-deviance-deg: 30  # TODO: not yet implemented
 
@@ -27,4 +40,4 @@ filters:
     military-only: false  # TODO: not yet implemented
 
 
-api-query-interval-seconds: 30
+api-query-interval-seconds: 120
