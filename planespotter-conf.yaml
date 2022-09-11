@@ -10,8 +10,8 @@ location:
     
 
 filters:
-    max-distance-nm: 5      # REQUIRED by adsbexchange API.
-    max-altitude-ft: 3000
+    max-distance-nm: 30      # REQUIRED by adsbexchange API.
+    max-altitude-ft: 90000
     min-airspeed-nm: 10     # TODO: not yet implemented # anything less than 20nm is probably taxiing
     max-deviance-deg: 30  # TODO: not yet implemented
 
@@ -27,4 +27,4 @@ filters:
     military-only: false  # TODO: not yet implemented
 
 
-api-query-interval-seconds: 30
+api-query-interval-seconds: 150
