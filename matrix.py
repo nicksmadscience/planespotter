@@ -7,32 +7,36 @@ import socket, time
 
 
 
-def matrixSend(img, buzzer):
+def matrixSend(img, buzzer=False, brightness=15):
     matrix = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     
-    omfg = b""
-    rofl = [0] * 33
-    for x in range(0, 32):
-        column = 0
-        # print ("x")
+    # rofl = [0] * 33
+    # for x in range(0, 32):
+    #     column = 0
+    #     for y in range(0, 8):
+    #         column = column | (img.getpixel((x, y))[0] > 128) << y
+    #     rofl[x] = column
+    # rofl[32] = 255 if buzzer is True else 0 # whooooa, pythonic as fuck
+    # wtf = bytearray(rofl)
+    
+    rofl = [0] * 34
+    for device in range(0, 4):
         for y in range(0, 8):
-            # print ("y")
-            # print (img.getpixel((x, y)))
-            column = column | (img.getpixel((x, y))[0] > 128) << y
-        # print (hex(column))
-        # omfg += chr(column).encode("utf-8")
-        rofl[x] = column
-        # omfg += bytes(chr(column), "utf-8")
-        # print (omfg)
-    # print (rofl)
+            row = 0
+            for x in range(0, 8):
+                print ((device * 8) + x, y)
+                row = row | (img.getpixel(((device * 8) + x, y))[0] > 128) << (7 - x)
+            rofl[(device * 8) + y] = row
+    
     rofl[32] = 255 if buzzer is True else 0 # whooooa, pythonic as fuck
+    rofl[33] = brightness
     wtf = bytearray(rofl)
-    # print (wtf)
-    # print (bytes(wtf))
+    print (wtf)
     
     
 
     matrix.sendto(wtf, ("10.0.0.213", 1234))
+    # matrix.sendto(wtf, ("10.0.0.209", 1234))
 
 
 def matrixDrawFromString(text, size=9, gap_width=-1.2, buzzer=False):
