@@ -58,13 +58,23 @@ def generateStats(aircraft, config):
     estArrival_mins = "(unknown)"
     type            = "(unknown type)"
     tail            = "(unknown tail)"
+    hex             = "(unknown hex)"
+    
+    
+    try:
+        alt = aircraft['alt_geom']
+    except KeyError:
+        try:
+            alt = aircraft['alt_baro']
+        except KeyError:
+            alt = 0
     
 
     
     try:
         satellite = AltAzimuthRange()
         satellite.observer(config['location']['latitude'], config['location']['longitude'], config['location']['altitude-ft'] * .308)
-        satellite.target(float(aircraft['lat']), float(aircraft['lon']), float(aircraft['alt_geom']) * .308)
+        satellite.target(float(aircraft['lat']), float(aircraft['lon']), float(alt) * .308)
 
         altazar = satellite.calculate()
         degreesPan = altazar['azimuth']
@@ -112,11 +122,16 @@ def generateStats(aircraft, config):
         traceback.print_exc()
         tail = "(unknown tail)"
         
-    return degreesPan, degreesTilt, distance, cardinal, dist, deviance, estArrival_mins, type, tail
+    try:
+        hex = aircraft['hex']
+    except KeyError:
+        traceback.print_exc()
+        
+    return degreesPan, degreesTilt, distance, cardinal, dist, deviance, estArrival_mins, type, tail, hex
 
 
-def generateHumanReadableStatus(degreesPan, degreesTilt, distance, cardinal, dist, deviance, estArrival_mins, type, tail):
-    return ("{datetime} Cool aircraft nearby! {type}, tail {tail}, {dist}nm {card}, {dev}deg deviance, {arr}m est arrival (pan: {degreesPan}, tilt: {degreesTilt}, distance: {distance})".format(type = type, tail=tail, dist = dist, card = cardinal, dev = deviance, arr=estArrival_mins, degreesPan=degreesPan, degreesTilt=degreesTilt, distance=distance, datetime=datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S")))
+def generateHumanReadableStatus(degreesPan, degreesTilt, distance, cardinal, dist, deviance, estArrival_mins, type, tail, hex):
+    return ("{datetime} Cool aircraft nearby! {type}, tail {tail}, {dist}nm {card}, {dev}deg deviance, {arr}m est arrival (pan: {degreesPan}, tilt: {degreesTilt}, distance: {distance}) {hex}".format(type = type, tail=tail, dist = dist, card = cardinal, dev = deviance, arr=estArrival_mins, degreesPan=degreesPan, degreesTilt=degreesTilt, distance=distance, hex=hex, datetime=datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S")))
 
 
 

@@ -4,9 +4,10 @@ import json, pprint, requests
 from termcolor import colored
 from planespotter_helpers import *
 from matrix import *
+import subprocess
 
 
-#### TWILIO SMS STUFF - REMOVE IF NOT USED #####
+##### TWILIO SMS STUFF - REMOVE IF NOT USED #####
 
 from twilio.rest import Client
 
@@ -52,12 +53,15 @@ import serial, time
 #     ser.write(hex_off)
 #     time.sleep(1.0)
 
+
+
+
 def planeSpotted(aircraft, config):
     '''Called by main script when an aircraft is spotted nearby.  This is where all your custom functionality goes.'''
     # exampleAlertFunction(aircraft)
     
-    degreesPan, degreesTilt, distance, cardinal, dist, deviance, estArrival_mins, type, tail = generateStats(aircraft, config)
-    status = generateHumanReadableStatus(degreesPan, degreesTilt, distance, cardinal, dist, deviance, estArrival_mins, type, tail)
+    degreesPan, degreesTilt, distance, cardinal, dist, deviance, estArrival_mins, type, tail, hex = generateStats(aircraft, config)
+    status = generateHumanReadableStatus(degreesPan, degreesTilt, distance, cardinal, dist, deviance, estArrival_mins, type, tail, hex)
     
     
     # ser = serial.Serial('/dev/ttyUSB0', 9600)
@@ -69,62 +73,70 @@ def planeSpotted(aircraft, config):
     # ser.close()
 
     
-    whitelist = ["EC35",
-                 "EC20",
-                 "AS65",
+    whitelist = ["BK17", # mbb / kawasaki
+                 
+                 "EC20", # aerospatiale / eurocopter / airbus
+                 "EC35", 
                  "EC45",
-                 "B06",
-                 "R22",
+                 "EC55",
+                 "AS50",
+                 "AS55",
+                 "AS65",
+                 "H160",
+                 
+                 "R22", # robinson
                  "R44",
                  "R66",
+                 
+                 "B06", # bell
+                 "UH1",
+                 "UH1N",
                  "B412",
                  "B407",
                  "B429",
-                 "EC55",
-                 "BK17",
-                 "AS50",
-                 "UH1",
-                 "H60",
-                 "A139",
+                 
+                 "H64", # boeing
+                 "H47",
+                 
+                 "V22", # bell boeing
+                 
+                 "H60", # sikorsky
+                 "S76",
+
+                 "A139", # agusta-westland / leonardo
                  "A109",
-                 "A119"
+                 "A119",
+                 "A169",
+                 
+                 "G2CA", # guimbal
+                 
+                 "H500",
                  ]
     
     
+    
 
+    
+    str = "{type}, {tail}, {est}m {cardinal}".format(type=type, tail=tail, est=estArrival_mins, cardinal=cardinal)
+    
     try:
         if aircraft["t"] in whitelist:
-            # sendTwilioTextMessage (client, status)   # Remove if not using Twilio SMS
+            # pprint.pprint(aircraft)
             print (colored(status, "yellow"))
+            subprocess.call(["afplay", "airplane-chime.wav"])
             matrixAlert(4)
-            
-            matrixDrawFromString(aircraft['t'])
-                
-            time.sleep(3)
-            try:
-                matrixDrawFromString(aircraft["flight"])
-                time.sleep(3)
-            except KeyError:
-                pass
+            for i in range(0, 3):
+                matrixDrawFromString(str)
         else:
-            print (colored(status, "blue"))
-            # matrixAlert()
+            print (status)
+            # matrixDrawFromString(str)
             
-            matrixDrawFromString(aircraft['t'])
-                
-            time.sleep(3)
-            try:
-                matrixDrawFromString(aircraft["flight"])
-                time.sleep(3)
-            except KeyError:
-                pass
+        
+
     except KeyError:
         print (colored(status, "red"))
+        subprocess.call(["afplay", "airplane-chime.wav"])
         matrixAlert(3)
-        matrixDrawFromString("bogey")
-        time.sleep(3)
-        
-    # print ("e")
-    # if aircraft["t"] not in whitelist:
-    
+        for i in range(0, 3):
+            matrixDrawFromString("bogey")
         
