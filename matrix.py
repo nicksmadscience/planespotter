@@ -7,7 +7,7 @@ import socket, time
 
 
 
-def matrixSend(img, buzzer=False, brightness=15):
+def matrixSend(img, buzzer=False, brightness=15, ips=["10.0.0.213", "10.0.0.251"]):
     matrix = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     
     # rofl = [0] * 33
@@ -24,40 +24,45 @@ def matrixSend(img, buzzer=False, brightness=15):
         for y in range(0, 8):
             row = 0
             for x in range(0, 8):
-                print ((device * 8) + x, y)
                 row = row | (img.getpixel(((device * 8) + x, y))[0] > 128) << (7 - x)
             rofl[(device * 8) + y] = row
     
     rofl[32] = 255 if buzzer is True else 0 # whooooa, pythonic as fuck
     rofl[33] = brightness
     wtf = bytearray(rofl)
-    print (wtf)
     
-    
-
-    matrix.sendto(wtf, ("10.0.0.213", 1234))
-    # matrix.sendto(wtf, ("10.0.0.209", 1234))
+    for ip in ips:
+        try:
+            matrix.sendto(wtf, (ip, 1234))
+        except:
+            pass
 
 
 def matrixDrawFromString(text, size=9, gap_width=-1.2, buzzer=False):
     font = ImageFont.truetype("slkscr.ttf",size)
-    img=Image.new("RGBA", (32,8),(0,0,0))
-
-    draw = ImageDraw.Draw(img)
     
-    # total_text_width = draw.textlength(text, font=font)
     # width_difference = 32 - total_text_width
     # gap_width = int(width_difference / (len(text) - 1))
-    xpos = 0
-    for letter in text:
-        draw.text((xpos,-1), letter, font=font)
-        letter_width = draw.textlength(letter, font=font)
-        xpos += letter_width + gap_width
+    
+    img=Image.new("RGBA", (32,8),(0,0,0))
+    draw = ImageDraw.Draw(img)
+    total_text_width = draw.textlength(text, font=font)
     
     
-    # draw.text((0, -1), str, font=font)
-    
-    matrixSend(img, buzzer)
+    for i in range(0, int(total_text_width + 32)):
+        img=Image.new("RGBA", (32,8),(0,0,0))
+        draw = ImageDraw.Draw(img)
+        xpos = 0
+        for letter in text:
+            draw.text((32 + xpos - i, -1), letter, font=font)
+            letter_width = draw.textlength(letter, font=font)
+            xpos += letter_width + gap_width
+        
+        
+        # draw.text((0, -1), str, font=font)
+        
+        matrixSend(img, buzzer)
+        time.sleep(0.03)
     
 
 def matrixAlert(count=3):
@@ -77,10 +82,46 @@ def matrixAlert(count=3):
         matrixSend(img, buzzer=False)
         
         time.sleep(0.4)
+        
+def loadAndSendMatrix(path, ips):
+    img = Image.open(path).convert("RGB")
+    # pixels = img.load()
+    matrixSend(img, buzzer=False, ips=ips)
 
     
 if __name__ == "__main__":
-    matrixAlert()
-    matrixDrawFromString("n600ll", 9)
-    time.sleep(4)
-    matrixDrawFromString("")
+    # matrixAlert()
+    # matrixDrawFromString("latest followers:  nicksmadscience, nujj_kmelbone", 9)
+    # matrixDrawFromString("new follower: rockem_sockem", 9)
+    # time.sleep(4)
+    # matrixDrawFromString("")
+    while True:
+        for i in range(0, 3):
+            loadAndSendMatrix("pto6.png", ["10.0.0.251"])
+            time.sleep(0.8)
+            
+            loadAndSendMatrix("pto-blank.png", ["10.0.0.251"])
+            time.sleep(0.2)
+            
+        for i in range(0, 3):
+            loadAndSendMatrix("pto4.png", ["10.0.0.251"])
+            time.sleep(0.5)
+            
+            loadAndSendMatrix("pto5.png", ["10.0.0.251"])
+            time.sleep(0.5)
+           
+        loadAndSendMatrix("pto1.png", ["10.0.0.251"])
+        time.sleep(1.2)
+        
+        loadAndSendMatrix("pto2.png", ["10.0.0.251"])
+        time.sleep(1.2)
+        
+        loadAndSendMatrix("pto3.png", ["10.0.0.251"])
+        time.sleep(1.2)
+        
+        for i in range(0, 5):
+            loadAndSendMatrix("pto4.png", ["10.0.0.251"])
+            time.sleep(0.5)
+            
+            loadAndSendMatrix("pto5.png", ["10.0.0.251"])
+            time.sleep(0.5)
