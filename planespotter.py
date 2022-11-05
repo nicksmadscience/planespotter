@@ -47,20 +47,22 @@ while True:
     # print (response.text)
 
     try:
-        newAircraft = json.loads(response.text)['ac']
+        currentAircraft = json.loads(response.text)['ac']
     except KeyError:
-        newAircraft = None
+        currentAircraft = None
+    except:
+        traceback.print_exc()
 
-    if newAircraft != None:
+    if currentAircraft != None:
 
-        # pprint.pprint (newAircraft)
+        # pprint.pprint (currentAircraft)
 
         numberOfAircraft = 0
-        for aircraft in newAircraft:
+        for aircraft in currentAircraft:
             aircraft["timestamp"] = datetime.datetime.now()
             # pprint.pprint(aircraft)
             numberOfAircraft += 1
-            # print ("now processing aircraft {noa} of {total}".format(noa = numberOfAircraft, total = len(newAircraft)))
+            # print ("now processing aircraft {noa} of {total}".format(noa = numberOfAircraft, total = len(currentAircraft)))
 
             # this is cool; thanks Odorlemon for the assist!
             aircraft_hash = { aircraft['hex']: aircraft for aircraft in masterAircraft }
@@ -96,7 +98,7 @@ while True:
                 # (can you remove it from the list?  yes)
 
     # for aircraft in masterAircraft:
-    #     if aircraft not in newAircraft:
+    #     if aircraft not in currentAircraft:
     #         try:
     #             tail = aircraft["flight"]
     #         except KeyError:
@@ -108,20 +110,20 @@ while True:
     
     
     for aircraft in masterAircraft:
-        if datetime.datetime.now() > aircraft["timestamp"] + datetime.timedelta(minutes = 1):
-            try:
-                tail = aircraft["flight"]
-            except KeyError:
-                tail = "(bogey)"
-            # print ("{tail} has expired; removing".format(tail=tail))
-            masterAircraft.remove(aircraft)
-            
-    for aircraft in masterAircraft:
         try:
             tail = aircraft["flight"]
         except KeyError:
-                tail = "(bogey)"
-        # print ("{tail} is still in masterAircraft".format(tail=tail))
+            tail = "(bogey)"
+                
+        if datetime.datetime.now() > aircraft["timestamp"] + datetime.timedelta(minutes = 1):
+            if aircraft not in currentAircraft:
+                print ("{tail} has expired and is no longer in currentAircraft; removing".format(tail=tail))
+                masterAircraft.remove(aircraft)
+            else: 
+                print ("{tail} has expired but is still in currentAircraft; not removing yet".format(tail=tail))
+            
+    for aircraft in masterAircraft:
+        print ("{tail} is still in masterAircraft".format(tail=tail))
     
     
     time.sleep(int(ps_config['api-query-interval-seconds']))
