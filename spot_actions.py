@@ -123,7 +123,7 @@ def planeSpotted(aircraft, config):
         if aircraft["t"] in whitelist:
             # pprint.pprint(aircraft)
             print (colored(status, "yellow"))
-            subprocess.call(["afplay", "airplane-chime.wav"])
+            subprocess.call(["afplay", "airplane-ding-dong.wav"])
             matrixAlert(4)
             for i in range(0, 3):
                 matrixDrawFromString(str)
@@ -134,9 +134,10 @@ def planeSpotted(aircraft, config):
         
 
     except KeyError:
-        print (colored(status, "red"))
-        subprocess.call(["afplay", "airplane-chime.wav"])
-        matrixAlert(3)
-        for i in range(0, 3):
-            matrixDrawFromString("bogey")
+        if tail == "(unknown tail)":
+            print (colored(status, "red"))
+            subprocess.call(["afplay", "airplane-ding.wav"])
+            matrixAlert(3)
+            for i in range(0, 3):
+                matrixDrawFromString("bogey")
         
