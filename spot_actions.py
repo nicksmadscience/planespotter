@@ -94,6 +94,7 @@ def planeSpotted(aircraft, config):
                  "B412",
                  "B407",
                  "B429",
+                 "B505",
                  
                  "H64", # boeing
                  "H47",
@@ -111,6 +112,8 @@ def planeSpotted(aircraft, config):
                  "G2CA", # guimbal
                  
                  "H500",
+                 
+                 "EN28",
                  ]
     
     

@@ -108,12 +108,20 @@ while True:
     #         masterAircraft.remove(aircraft)
     
     
-    
+    # Expiration handling
     for aircraft in masterAircraft:
         try:
             tail = aircraft["flight"]
         except KeyError:
             tail = "(bogey)"
+            
+        time_now = datetime.datetime.now()
+        aircraft_timestamp = aircraft["timestamp"]
+        aircraft_timestamp_plus_delta = aircraft["timestamp"] + datetime.timedelta(minutes = 1)
+        
+        print ("time_now: ", time_now)
+        print ("aircraft_timestamp: ", aircraft_timestamp)
+        print ("aircraft_timestamp_plus_delta: ", aircraft_timestamp_plus_delta)
                 
         if datetime.datetime.now() > aircraft["timestamp"] + datetime.timedelta(minutes = 1):
             if aircraft not in currentAircraft:
@@ -121,6 +129,8 @@ while True:
                 masterAircraft.remove(aircraft)
             else: 
                 print ("{tail} has expired but is still in currentAircraft; not removing yet".format(tail=tail))
+                
+            print ()
             
     for aircraft in masterAircraft:
         print ("{tail} is still in masterAircraft".format(tail=tail))
