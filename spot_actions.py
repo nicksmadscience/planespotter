@@ -124,22 +124,23 @@ def planeSpotted(aircraft, config):
     
     try:
         if aircraft["t"] in whitelist:
-            # pprint.pprint(aircraft)
+            pprint.pprint(aircraft)
             print (colored(status, "yellow"))
-            subprocess.call(["afplay", "airplane-ding-dong.wav"])
+            # subprocess.call(["afplay", "airplane-ding-dong.wav"])
+            # requests.get("http://10.0.0.44:8081/preset/hypetrain1")
             matrixAlert(4)
             for i in range(0, 3):
                 matrixDrawFromString(str)
         else:
             print (status)
-            # matrixDrawFromString(str)
+            matrixDrawFromString(str)
             
         
 
     except KeyError:
         if tail == "(unknown tail)":
             print (colored(status, "red"))
-            subprocess.call(["afplay", "airplane-ding.wav"])
+            # subprocess.call(["afplay", "airplane-ding.wav"])
             matrixAlert(3)
             for i in range(0, 3):
                 matrixDrawFromString("bogey")
