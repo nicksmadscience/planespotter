@@ -76,6 +76,7 @@ def planeSpotted(aircraft, config):
     whitelist = ["BK17", # mbb / kawasaki
                  
                  "EC20", # aerospatiale / eurocopter / airbus
+                 "EC30",
                  "EC35", 
                  "EC45",
                  "EC55",
@@ -83,6 +84,7 @@ def planeSpotted(aircraft, config):
                  "AS55",
                  "AS65",
                  "H160",
+                 "BK17",
                  
                  "R22", # robinson
                  "R44",
@@ -91,8 +93,9 @@ def planeSpotted(aircraft, config):
                  "B06", # bell
                  "UH1",
                  "UH1N",
-                 "B412",
+                 "B212",
                  "B407",
+                 "B412",
                  "B429",
                  "B505",
                  
@@ -111,9 +114,9 @@ def planeSpotted(aircraft, config):
                  
                  "G2CA", # guimbal
                  
-                 "H500",
+                 "H500", # hughes
                  
-                 "EN28",
+                 "EN28", # enstrom
                  ]
     
     
@@ -126,7 +129,7 @@ def planeSpotted(aircraft, config):
         if aircraft["t"] in whitelist:
             pprint.pprint(aircraft)
             print (colored(status, "yellow"))
-            # subprocess.call(["afplay", "airplane-ding-dong.wav"])
+            subprocess.Popen(["afplay", "airplane-ding-dong.wav"])
             # requests.get("http://10.0.0.44:8081/preset/hypetrain1")
             matrixAlert(4)
             for i in range(0, 3):
@@ -140,7 +143,7 @@ def planeSpotted(aircraft, config):
     except KeyError:
         if tail == "(unknown tail)":
             print (colored(status, "red"))
-            # subprocess.call(["afplay", "airplane-ding.wav"])
+            subprocess.Popen(["afplay", "airplane-ding.wav"])
             matrixAlert(3)
             for i in range(0, 3):
                 matrixDrawFromString("bogey")
