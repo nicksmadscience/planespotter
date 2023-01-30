@@ -1,10 +1,21 @@
 # Customize this script to your heart's content!  This is where you can specify what happens
 # when a new aircraft is spotted.
-import json, pprint, requests
+import json, pprint, requests, csv
 from termcolor import colored
 from planespotter_helpers import *
 from matrix import *
 import subprocess
+
+
+registrations = []
+with open('bills_operators.csv', 'r') as file:
+    reg_reader = csv.reader(file)
+    for line in reg_reader:
+        registrations.append(line)
+        
+# pprint.pprint(registrations)
+        
+# registrations = { aircraft['hex']: aircraft for aircraft in reg }
 
 
 ##### TWILIO SMS STUFF - REMOVE IF NOT USED #####
@@ -55,88 +66,115 @@ import serial, time
 
 
 
+def findInRegistrations(hex):
+    for ac in registrations:
+        if ac[3].upper() == hex.upper():
+            return ac
+        
+    return None
+
+
+alertList = {}
+
+def alertListClear(hex):
+    global alertList
+    print (alertList)
+    if hex in alertList:
+        print ("hex in alertlist")
+        print ("alertList[hex]: ", alertList[hex])
+        print ("alertList[hex] + datetime.timedelta(minutes=5): ", alertList[hex] + datetime.timedelta(minutes=5))
+        print ("datetime.datetime.now(): ", datetime.datetime.now())
+        # print ("alertList[hex] + datetime.timedelta(minutes=5) < datetime.datetime.now(): ", alertList[hex] + datetime.timedelta(minutes=5) < datetime.datetime.now())
+        # print ("(alertList[hex] + datetime.timedelta(minutes=5)) < datetime.datetime.now(): ", (alertList[hex] + datetime.timedelta(minutes=5)) < datetime.datetime.now())
+        if (alertList[hex] + datetime.timedelta(minutes=5)) > datetime.datetime.now():
+            print ("alert list not clear")
+            return False
+    
+    print ("alert list clear")            
+    return True
+
+
 
 def planeSpotted(aircraft, config):
     '''Called by main script when an aircraft is spotted nearby.  This is where all your custom functionality goes.'''
     # exampleAlertFunction(aircraft)
     
+    global alertList
+    
     degreesPan, degreesTilt, distance, cardinal, dist, deviance, estArrival_mins, type, tail, hex = generateStats(aircraft, config)
     status = generateHumanReadableStatus(degreesPan, degreesTilt, distance, cardinal, dist, deviance, estArrival_mins, type, tail, hex)
     
-    
-    # ser = serial.Serial('/dev/ttyUSB0', 9600)
-    # print ("activating strobe light")
-    # ser.write(hex_on)
-    # time.sleep(5.0)
-    # print ("strobe light off")
-    # ser.write(hex_off)
-    # ser.close()
+
 
     
-    whitelist = ["BK17", # mbb / kawasaki
+    # whitelist = ["BK17", # mbb / kawasaki
                  
-                 "EC20", # aerospatiale / eurocopter / airbus
-                 "EC30",
-                 "EC35", 
-                 "EC45",
-                 "EC55",
-                 "AS50",
-                 "AS55",
-                 "AS65",
-                 "H160",
-                 "BK17",
+    #              "EC20", # aerospatiale / eurocopter / airbus
+    #              "EC30",
+    #              "EC35", 
+    #              "EC45",
+    #              "EC55",
+    #              "AS50",
+    #              "AS55",
+    #              "AS65",
+    #              "H160",
+    #              "BK17",
                  
-                 "R22", # robinson
-                 "R44",
-                 "R66",
+    #              "R22", # robinson
+    #              "R44",
+    #              "R66",
                  
-                 "B06", # bell
-                 "UH1",
-                 "UH1N",
-                 "B212",
-                 "B407",
-                 "B412",
-                 "B429",
-                 "B505",
+    #              "B06", # bell
+    #              "UH1",
+    #              "UH1N",
+    #              "B212",
+    #              "B407",
+    #              "B412",
+    #              "B429",
+    #              "B505",
                  
-                 "H64", # boeing
-                 "H47",
+    #              "H64", # boeing
+    #              "H47",
                  
-                 "V22", # bell boeing
+    #              "V22", # bell boeing
                  
-                 "H60", # sikorsky
-                 "S76",
+    #              "H60", # sikorsky
+    #              "S76",
 
-                 "A139", # agusta-westland / leonardo
-                 "A109",
-                 "A119",
-                 "A169",
+    #              "A139", # agusta-westland / leonardo
+    #              "A109",
+    #              "A119",
+    #              "A169",
                  
-                 "G2CA", # guimbal
+    #              "G2CA", # guimbal
                  
-                 "H500", # hughes
+    #              "H500", # hughes
                  
-                 "EN28", # enstrom
-                 ]
+    #              "EN28", # enstrom
+    #              ]
     
     
     
 
     
-    str = "{type}, {tail}, {est}m {cardinal}".format(type=type, tail=tail, est=estArrival_mins, cardinal=cardinal)
     
+    hex = aircraft["hex"]
+    print ("hex: ", hex)
     try:
-        if aircraft["t"] in whitelist:
-            pprint.pprint(aircraft)
-            print (colored(status, "yellow"))
+        ac = findInRegistrations(hex)
+        if ac is not None and alertListClear(hex) and distance != -1:
+            str = "{type}, {tail}, {est}m {cardinal}".format(type=ac[2], tail=ac[1], est=estArrival_mins, cardinal=cardinal)
+            alertList[hex] = datetime.datetime.now()
+            # pprint.pprint(aircraft)
+            print (colored(str, "yellow"))
             subprocess.Popen(["afplay", "airplane-ding-dong.wav"])
             # requests.get("http://10.0.0.44:8081/preset/hypetrain1")
             matrixAlert(4)
-            for i in range(0, 3):
+            for i in range(0, 1):
                 matrixDrawFromString(str)
         else:
             print (status)
-            matrixDrawFromString(str)
+        #     matrixDrawFromString(str)
             
         
 
@@ -145,6 +183,9 @@ def planeSpotted(aircraft, config):
             print (colored(status, "red"))
             subprocess.Popen(["afplay", "airplane-ding.wav"])
             matrixAlert(3)
-            for i in range(0, 3):
+            for i in range(0, 1):
                 matrixDrawFromString("bogey")
+    
+    except:
+        traceback.print_exc()
         

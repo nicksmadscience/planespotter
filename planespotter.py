@@ -1,4 +1,4 @@
-import requests, json, pprint, time, yaml, datetime
+import requests, json, pprint, time, yaml, datetime, csv
 
 
 
@@ -8,19 +8,20 @@ with open("secrets-adsbx.json", "r") as secrets_file:
 
 with open(r'planespotter-conf.yaml') as file:
     ps_config = yaml.load(file, Loader=yaml.FullLoader)
+    
 
 from planespotter_helpers import *
 from spot_actions import *
 
-url = 'https://adsbexchange-com1.p.rapidapi.com/v2/lat/{lat}/lon/{lon}/dist/{dist}/'.format(lat = ps_config['location']['latitude'], lon = ps_config['location']['longitude'], dist = ps_config['filters']['max-distance-nm'])
+# url = 'https://adsbexchange-com1.p.rapidapi.com/v2/lat/{lat}/lon/{lon}/dist/{dist}/'.format(lat = ps_config['location']['latitude'], lon = ps_config['location']['longitude'], dist = ps_config['filters']['max-distance-nm'])
 
-headers = {
-    "X-RapidAPI-Host": "adsbexchange-com1.p.rapidapi.com",
-    "X-RapidAPI-Key": key
-    }
+# headers = {
+#     "X-RapidAPI-Host": "adsbexchange-com1.p.rapidapi.com",
+#     "X-RapidAPI-Key": key
+#     }
 
 
-# url = 'http://localhost:80/tar1090/data/aircraft.json'
+url = 'http://10.0.0.222/tar1090/data/aircraft.json'
 
 # All aircraft are added to this list when they're first spotted and
 # are ignored if their ICAO number appears in the adsbx API call
@@ -43,29 +44,32 @@ def findAltitude(aircraft):
 
 # begin the infinite loop!
 while True:
-    response = requests.request("GET", url, headers=headers)
+    # response = requests.request("GET", url, headers=headers)
+    response = requests.request("GET", url)
     # print (response.text)
 
     try:
-        currentAircraft = json.loads(response.text)['ac']
+        currentAircraftList = json.loads(response.text)['aircraft']
+        # pprint.pprint (currentAircraftList)
     except KeyError:
-        currentAircraft = None
+        currentAircraftList = None
     except:
         traceback.print_exc()
 
-    if currentAircraft != None:
+    if currentAircraftList != None:
 
-        # pprint.pprint (currentAircraft)
+        # pprint.pprint (currentAircraftList)
 
         numberOfAircraft = 0
-        for aircraft in currentAircraft:
+        for aircraft in currentAircraftList:
             aircraft["timestamp"] = datetime.datetime.now()
             # pprint.pprint(aircraft)
             numberOfAircraft += 1
-            # print ("now processing aircraft {noa} of {total}".format(noa = numberOfAircraft, total = len(currentAircraft)))
+            # print ("now processing aircraft {noa} of {total}".format(noa = numberOfAircraft, total = len(currentAircraftList)))
 
             # this is cool; thanks Odorlemon for the assist!
             aircraft_hash = { aircraft['hex']: aircraft for aircraft in masterAircraft }
+            # pprint.pprint (aircraft_hash)
 
             distance_nm = calculateDistance(aircraft, ps_config)
             # print ("distance: ", distance_nm)
@@ -74,6 +78,7 @@ while True:
                 # TODO: This needs a more elegant filtering system,  not one
                 # based on a series of if statements
                 if aircraft['hex'] not in aircraft_hash:
+                    
                     if int(findAltitude(aircraft)) <= int(ps_config['filters']['max-altitude-ft']):
                         
                         try:
@@ -98,7 +103,7 @@ while True:
                 # (can you remove it from the list?  yes)
 
     # for aircraft in masterAircraft:
-    #     if aircraft not in currentAircraft:
+    #     if aircraft not in currentAircraftList:
     #         try:
     #             tail = aircraft["flight"]
     #         except KeyError:
@@ -119,16 +124,16 @@ while True:
         aircraft_timestamp = aircraft["timestamp"]
         aircraft_timestamp_plus_delta = aircraft["timestamp"] + datetime.timedelta(minutes = 1)
         
-        print ("time_now: ", time_now)
-        print ("aircraft_timestamp: ", aircraft_timestamp)
-        print ("aircraft_timestamp_plus_delta: ", aircraft_timestamp_plus_delta)
+        # print ("time_now: ", time_now)
+        # print ("aircraft_timestamp: ", aircraft_timestamp)
+        # print ("aircraft_timestamp_plus_delta: ", aircraft_timestamp_plus_delta)
                 
         if datetime.datetime.now() > aircraft["timestamp"] + datetime.timedelta(minutes = 1):
-            if aircraft not in currentAircraft:
-                print ("{tail} has expired and is no longer in currentAircraft; removing".format(tail=tail))
+            if aircraft not in currentAircraftList:
+                print ("{tail} has expired and is no longer in currentAircraftList; removing".format(tail=tail))
                 masterAircraft.remove(aircraft)
             else: 
-                print ("{tail} has expired but is still in currentAircraft; not removing yet".format(tail=tail))
+                print ("{tail} has expired but is still in currentAircraftList; not removing yet".format(tail=tail))
                 
             print ()
             

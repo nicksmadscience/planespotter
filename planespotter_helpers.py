@@ -94,32 +94,32 @@ def generateStats(aircraft, config):
         else:
             dist = str(round(float(dist_nm), 2))
     except:
-        traceback.print_exc()
+        # traceback.print_exc()
         dist = "(unknown distance)"
 
     try:
         if degreesPan != -1:
             deviance = calculateDeviance(float(aircraft['track']), degreesPan)
     except (KeyError, UnboundLocalError):
-        traceback.print_exc()
+        # traceback.print_exc()
         deviance = "(unknown)"
 
     try:
         estArrival_mins = round((dist_nm / float(aircraft['gs']) * 60))
     except:
-        traceback.print_exc()
+        # traceback.print_exc()
         estArrival_mins = "(unknown)"
 
     try:
         type = aircraft['t']
     except KeyError:
-        traceback.print_exc()
+        # traceback.print_exc()
         type = "(unknown type)"
 
     try:
         tail = aircraft['flight']
     except KeyError:
-        traceback.print_exc()
+        # traceback.print_exc()
         tail = "(unknown tail)"
         
     try:
